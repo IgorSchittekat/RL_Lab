@@ -6,7 +6,6 @@ We expect all classes to follow the Bandit abstract object formalism.
 """
 # -*- coding: utf-8 -*-
 import numpy as np
-import math
 
 class Bandit(object):
     """
