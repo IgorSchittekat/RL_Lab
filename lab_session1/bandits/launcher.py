@@ -9,6 +9,7 @@ from utils import *
 from agents import *
 from bandit import *
 
+
 ## FUNCTIONS ===================================================================
 
 def run_bandit(agent, kbandit, max_steps) -> (np.array, np.array):
@@ -35,7 +36,19 @@ def run_bandit(agent, kbandit, max_steps) -> (np.array, np.array):
                 of ones and zeros rather than actual booleans.
     """
     # TODO: implement this function.
-    return perf, best_action
+    perf = []
+    best_action = []
+
+    kbandit.reset()
+    agent.reset()
+    for i in range(max_steps):
+        action = agent.act()
+        perf.append(kbandit.pull(action))
+        best_action.append(int(kbandit.best_action == action))
+        agent.learn(action, perf[-1])
+
+    return np.array(perf), np.array(best_action)
+
 
 def run_multiple_bandits(n_runs, **kwargs) -> (np.array, np.array):
     """
@@ -139,7 +152,7 @@ kbandit = KBandit(**config)
 
 # Un-comment the one you want to use.
 launch_type = 'multiple_agents'
-#launch_type = 'spectrum'
+# launch_type = 'spectrum'
 
 if launch_type == 'multiple_agents':
     agents = [
@@ -160,15 +173,14 @@ elif launch_type == 'spectrum':
     agent = UCB(**config)
     spectrum =  ['c', [0.25,0.5,1,2]]
     # finally, running:
-    perfs, best_actions = run_spectrum(spectrum, agent=agent, kbandit=kbandit, n_runs=n_runs, max_steps=max_steps
+    perfs, best_actions = run_spectrum(spectrum, agent=agent, kbandit=kbandit, n_runs=n_runs, max_steps=max_steps)
     # You can change the labels, title and file_name
     labels = ['{}={}'.format(spectrum[0], value) for value in spectrum[1]]
     file_name = 'plots/{}_study'.format(spectrum[0])
     suptitle = 'Varying {} for {} on k-armed-Bandit'.format(spectrum[0], agent.__class__.__name__)
 
-
 ## PLOTTING ====================================================================
 title = dict_string(config)
 
-action_plot (best_actions, file_name+'_action', suptitle, title, labels)
-perf_plot   (perfs, file_name+'_perf', suptitle, title, labels)
+action_plot(best_actions, file_name+'_action', suptitle, title, labels)
+perf_plot(perfs, file_name+'_perf', suptitle, title, labels)
