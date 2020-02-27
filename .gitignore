@@ -131,3 +131,5 @@ dmypy.json
 #macos temporary files
 .DS_Store/
 .DS_Store
+.idea/
+.idea
