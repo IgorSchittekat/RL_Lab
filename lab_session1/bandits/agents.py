@@ -121,6 +121,7 @@ class OptimisticGreedy(EpsGreedy):
     def __init__(self, q0, **kwargs):
         self.q0 = q0
         super().__init__(**kwargs)
+        self.eps = 0
 
     def reset(self):
         self.means = [self.q0] * self.k
