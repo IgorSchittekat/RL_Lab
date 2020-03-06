@@ -8,7 +8,7 @@ from gym.envs.registration import register
 # 4x4 environment
 kwargs = {'map_name': '4x4', 'is_slippery': False}
 # 8x8 environment
-# kwargs = {'map_name': '8x8', 'is_slippery': False}
+kwargs = {'map_name': '8x8', 'is_slippery': True}
 register(
     id='FrozenLakeNotSlippery-v0',
     entry_point='gym.envs.toy_text:FrozenLakeEnv',
@@ -27,7 +27,8 @@ state_size = env.observation_space.n
 
 # TODO Declare your q-table based on number of states and actions.
 
-qtable = [[0] * action_size] * state_size
+qtable = np.zeros((state_size, action_size))
+
 
 
 class Agent(object):
@@ -45,14 +46,14 @@ class Agent(object):
         qtable: numpy 2d-array
         """
         self.qtable = qtable
-        self.learning_rate = 0.1  # Learning rate
-        self.gamma = 0.95  # Discounting rate
+        self.learning_rate = 0.2  # Learning rate
+        self.gamma = 0.9  # Discounting rate
 
         # Exploration parameters
         self.epsilon = 1.0  # Exploration rate
         self.max_epsilon = 1.0  # Exploration probability at start
-        self.min_epsilon = 0.01  # Minimum exploration probability
-        self.decay_rate = 0.001  # Exponential decay rate for exploration prob
+        self.min_epsilon = 0.001  # Minimum exploration probability
+        self.decay_rate = 0.005  # Exponential decay rate for exploration prob
 
     def act(self, state, exp_exp_tradeoff):
         """
@@ -73,6 +74,10 @@ class Agent(object):
 
         """
         # TODO Write code to check if your agent wants to explore or exploit
+        if exp_exp_tradeoff > self.epsilon:
+            return np.argmax(self.qtable[state])
+        else:
+            return np.random.randint(action_size)
 
     def learn(self, state, action, reward, new_state):
         """
@@ -93,7 +98,11 @@ class Agent(object):
             new state after action
 
         """
+        # New Q(s,a) = Q(s,a)+lr(R(s,a)+gamma max(Q'(s',a'))-Q(s,a))
         # TODO Write code to update q-table
+        self.qtable[state, action] += self.learning_rate * (
+            reward + self.gamma * np.max(self.qtable[new_state]) - self.qtable[state, action]
+        )
 
     def update_epsilon(self, episode):
         """
@@ -129,7 +138,7 @@ class Trainer(object):
         """
         # config of your run.
         self.total_episodes = 20000  # Total episodes
-        self.max_steps = 99  # Max steps per episode
+        self.max_steps = 2000  # Max steps per episode
 
         # q-table
         self.qtable = qtable
@@ -165,7 +174,7 @@ class Trainer(object):
                 new_state, reward, done, info = env.step(action)
 
                 # update your qtable
-                self.agent.learn(state, action, new_state, reward)
+                self.agent.learn(state, action, reward, new_state)
 
                 # move your agent to new state
                 state = new_state
@@ -192,7 +201,7 @@ class Trainer(object):
         print(self.agent.qtable)
 
         # printing epsilon
-        print(self.epsilon)
+        print(self.agent.epsilon)
 
         return self.qtable
 
