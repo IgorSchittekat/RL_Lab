@@ -4,8 +4,6 @@ import random
 
 from gym.envs.registration import register
 
-
-
 # code to set a gym config
 # 4x4 environment
 kwargs = {'map_name': '4x4', 'is_slippery': False}
@@ -19,7 +17,6 @@ register(
     reward_threshold=0.8196
 )
 
-
 # code to set environment
 env = gym.make("FrozenLakeNotSlippery-v0")
 
@@ -28,10 +25,9 @@ action_size = env.action_space.n
 # statess
 state_size = env.observation_space.n
 
-
 # TODO Declare your q-table based on number of states and actions.
 
-qtable = 
+qtable = [[0] * action_size] * state_size
 
 
 class Agent(object):
@@ -49,14 +45,14 @@ class Agent(object):
         qtable: numpy 2d-array
         """
         self.qtable = qtable
-        self.learning_rate = 0.1           # Learning rate
-        self.gamma = 0.95                  # Discounting rate
+        self.learning_rate = 0.1  # Learning rate
+        self.gamma = 0.95  # Discounting rate
 
         # Exploration parameters
-        self.epsilon = 1.0                 # Exploration rate
-        self.max_epsilon = 1.0             # Exploration probability at start
-        self.min_epsilon = 0.01            # Minimum exploration probability
-        self.decay_rate = 0.001             # Exponential decay rate for exploration prob
+        self.epsilon = 1.0  # Exploration rate
+        self.max_epsilon = 1.0  # Exploration probability at start
+        self.min_epsilon = 0.01  # Minimum exploration probability
+        self.decay_rate = 0.001  # Exponential decay rate for exploration prob
 
     def act(self, state, exp_exp_tradeoff):
         """
@@ -97,7 +93,7 @@ class Agent(object):
             new state after action
 
         """
-        #TODO Write code to update q-table
+        # TODO Write code to update q-table
 
     def update_epsilon(self, episode):
         """
@@ -112,8 +108,9 @@ class Agent(object):
         -------
         """
         self.epsilon = self.min_epsilon + \
-            (self.max_epsilon - self.min_epsilon) * \
-            np.exp(-self.decay_rate*episode)
+                       (self.max_epsilon - self.min_epsilon) * \
+                       np.exp(-self.decay_rate * episode)
+
 
 class Trainer(object):
     """Class to train the agent."""
@@ -131,13 +128,12 @@ class Trainer(object):
 
         """
         # config of your run.
-        self.total_episodes = 20000        # Total episodes
-        self.max_steps = 99                # Max steps per episode
+        self.total_episodes = 20000  # Total episodes
+        self.max_steps = 99  # Max steps per episode
 
         # q-table
         self.qtable = qtable
         self.agent = Agent(self.qtable)
-
 
     def run(self):
         """
@@ -169,8 +165,7 @@ class Trainer(object):
                 new_state, reward, done, info = env.step(action)
 
                 # update your qtable
-                self.agent.learn(
-                    state, action, new_state, reward)
+                self.agent.learn(state, action, new_state, reward)
 
                 # move your agent to new state
                 state = new_state
@@ -185,13 +180,13 @@ class Trainer(object):
             episode += 1
 
             # update your exploration rate
-            agent.update_epsilon(episode)
+            self.agent.update_epsilon(episode)
 
             # global reward
             rewards.append(self.total_rewards)
 
         # print your scores
-        print("Score over time: " + str(sum(rewards)/self.total_episodes))
+        print("Score over time: " + str(sum(rewards) / self.total_episodes))
 
         # print the qtable
         print(self.agent.qtable)
@@ -238,8 +233,8 @@ if __name__ == '__main__':
     # reset environment and test
     env.reset()
     env.render()
-    if kwargs['map_name'] = '4x4':
+    if kwargs['map_name'] == '4x4':
         print(np.argmax(qtable, axis=1).reshape(4, 4))
-    elif kwargs['map_name'] = '8x8':
+    elif kwargs['map_name'] == '8x8':
         print(np.argmax(qtable, axis=1).reshape(8, 8))
     test()
